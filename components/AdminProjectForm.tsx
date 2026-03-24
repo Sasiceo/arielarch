@@ -1,0 +1,304 @@
+import { motion } from 'motion/react';
+import { useState } from 'react';
+import { X, Upload, Plus, Trash2 } from 'lucide-react';
+import { useLanguage } from '../contexts/LanguageContext';
+
+interface Category {
+  id: string;
+  nameEn: string;
+  nameHe: string;
+}
+
+interface ProjectFormData {
+  titleEn: string;
+  titleHe: string;
+  categoryEn: string;
+  categoryHe: string;
+  descriptionEn: string;
+  descriptionHe: string;
+  detailsEn: string;
+  detailsHe: string;
+  imageUrl: string;
+  images: string[];
+  category: string;
+}
+
+interface AdminProjectFormProps {
+  onClose: () => void;
+  onSave: (project: ProjectFormData) => void;
+  categories: Category[];
+  editProject?: ProjectFormData | null;
+}
+
+export function AdminProjectForm({ onClose, onSave, categories, editProject }: AdminProjectFormProps) {
+  const { language } = useLanguage();
+  const [formData, setFormData] = useState<ProjectFormData>(
+    editProject || {
+      titleEn: '',
+      titleHe: '',
+      categoryEn: '',
+      categoryHe: '',
+      descriptionEn: '',
+      descriptionHe: '',
+      detailsEn: '',
+      detailsHe: '',
+      imageUrl: '',
+      images: [''],
+      category: ''
+    }
+  );
+
+  const [imageInput, setImageInput] = useState('');
+
+  const handleCategoryChange = (categoryId: string) => {
+    const selectedCategory = categories.find(cat => cat.id === categoryId);
+    if (selectedCategory) {
+      setFormData({
+        ...formData,
+        category: categoryId,
+        categoryEn: selectedCategory.nameEn,
+        categoryHe: selectedCategory.nameHe
+      });
+    }
+  };
+
+  const handleAddImage = () => {
+    if (imageInput.trim()) {
+      setFormData({
+        ...formData,
+        images: [...formData.images, imageInput.trim()],
+        imageUrl: formData.imageUrl || imageInput.trim() // Set as main image if none exists
+      });
+      setImageInput('');
+    }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    const newImages = formData.images.filter((_, i) => i !== index);
+    setFormData({
+      ...formData,
+      images: newImages,
+      imageUrl: newImages.length > 0 ? newImages[0] : ''
+    });
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validation
+    if (!formData.titleEn || !formData.titleHe || !formData.category || !formData.imageUrl) {
+      alert('נא למלא את כל השדות החובה / Please fill all required fields');
+      return;
+    }
+
+    onSave(formData);
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        className="bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto"
+      >
+        {/* Header */}
+        <div className="sticky top-0 bg-white border-b border-[#1A1A1A]/10 px-8 py-6 flex items-center justify-between">
+          <h2 style={{ color: '#1A1A1A', fontSize: '1.5rem', fontWeight: 300 }}>
+            {editProject ? 'Edit Project / ערוך פרויקט' : 'Add New Project / הוסף פרויקט חדש'}
+          </h2>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-[#F3F3F3] transition-colors rounded-full"
+          >
+            <X className="w-5 h-5" style={{ color: '#1A1A1A' }} />
+          </button>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="p-8">
+          {/* Category Selection */}
+          <div className="mb-8">
+            <label className="block mb-3" style={{ color: '#1A1A1A', fontSize: '0.9rem', fontWeight: 400 }}>
+              Category / קטגוריה <span className="text-red-500">*</span>
+            </label>
+            <select
+              value={formData.category}
+              onChange={(e) => handleCategoryChange(e.target.value)}
+              className="w-full px-4 py-3 border border-[#1A1A1A]/20 focus:border-[#C6A667] focus:outline-none"
+              required
+            >
+              <option value="">Select Category / בחר קטגוריה</option>
+              {categories.map(cat => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.nameEn} / {cat.nameHe}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Title */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div>
+              <label className="block mb-2" style={{ color: '#1A1A1A', fontSize: '0.9rem', fontWeight: 400 }}>
+                Title (English) <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={formData.titleEn}
+                onChange={(e) => setFormData({ ...formData, titleEn: e.target.value })}
+                className="w-full px-4 py-3 border border-[#1A1A1A]/20 focus:border-[#C6A667] focus:outline-none"
+                placeholder="Project Title"
+                required
+              />
+            </div>
+            <div>
+              <label className="block mb-2" style={{ color: '#1A1A1A', fontSize: '0.9rem', fontWeight: 400, direction: 'rtl', textAlign: 'right' }}>
+                כותרת (עברית) <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={formData.titleHe}
+                onChange={(e) => setFormData({ ...formData, titleHe: e.target.value })}
+                className="w-full px-4 py-3 border border-[#1A1A1A]/20 focus:border-[#C6A667] focus:outline-none"
+                placeholder="כותרת הפרויקט"
+                dir="rtl"
+                required
+              />
+            </div>
+          </div>
+
+          {/* Description */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div>
+              <label className="block mb-2" style={{ color: '#1A1A1A', fontSize: '0.9rem', fontWeight: 400 }}>
+                Description (English)
+              </label>
+              <textarea
+                value={formData.descriptionEn}
+                onChange={(e) => setFormData({ ...formData, descriptionEn: e.target.value })}
+                className="w-full px-4 py-3 border border-[#1A1A1A]/20 focus:border-[#C6A667] focus:outline-none min-h-[100px]"
+                placeholder="Short description"
+              />
+            </div>
+            <div>
+              <label className="block mb-2" style={{ color: '#1A1A1A', fontSize: '0.9rem', fontWeight: 400, direction: 'rtl', textAlign: 'right' }}>
+                תיאור (עברית)
+              </label>
+              <textarea
+                value={formData.descriptionHe}
+                onChange={(e) => setFormData({ ...formData, descriptionHe: e.target.value })}
+                className="w-full px-4 py-3 border border-[#1A1A1A]/20 focus:border-[#C6A667] focus:outline-none min-h-[100px]"
+                placeholder="תיאור קצר"
+                dir="rtl"
+              />
+            </div>
+          </div>
+
+          {/* Details */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div>
+              <label className="block mb-2" style={{ color: '#1A1A1A', fontSize: '0.9rem', fontWeight: 400 }}>
+                Details (English)
+              </label>
+              <textarea
+                value={formData.detailsEn}
+                onChange={(e) => setFormData({ ...formData, detailsEn: e.target.value })}
+                className="w-full px-4 py-3 border border-[#1A1A1A]/20 focus:border-[#C6A667] focus:outline-none min-h-[150px]"
+                placeholder="Detailed project description"
+              />
+            </div>
+            <div>
+              <label className="block mb-2" style={{ color: '#1A1A1A', fontSize: '0.9rem', fontWeight: 400, direction: 'rtl', textAlign: 'right' }}>
+                פרטים (עברית)
+              </label>
+              <textarea
+                value={formData.detailsHe}
+                onChange={(e) => setFormData({ ...formData, detailsHe: e.target.value })}
+                className="w-full px-4 py-3 border border-[#1A1A1A]/20 focus:border-[#C6A667] focus:outline-none min-h-[150px]"
+                placeholder="תיאור מפורט של הפרויקט"
+                dir="rtl"
+              />
+            </div>
+          </div>
+
+          {/* Images */}
+          <div className="mb-8">
+            <label className="block mb-3" style={{ color: '#1A1A1A', fontSize: '0.9rem', fontWeight: 400 }}>
+              Project Images / תמונות פרויקט <span className="text-red-500">*</span>
+            </label>
+            
+            {/* Current Images */}
+            {formData.images.length > 0 && formData.images[0] && (
+              <div className="mb-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+                {formData.images.map((img, index) => img && (
+                  <div key={index} className="relative group">
+                    <img 
+                      src={img} 
+                      alt={`Preview ${index + 1}`}
+                      className="w-full h-32 object-cover border border-[#1A1A1A]/10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveImage(index)}
+                      className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                    {index === 0 && (
+                      <div className="absolute bottom-2 left-2 px-2 py-1 bg-[#C6A667] text-white text-xs">
+                        Main
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Add New Image */}
+            <div className="flex gap-2">
+              <input
+                type="url"
+                value={imageInput}
+                onChange={(e) => setImageInput(e.target.value)}
+                className="flex-1 px-4 py-3 border border-[#1A1A1A]/20 focus:border-[#C6A667] focus:outline-none"
+                placeholder="Image URL (https://...)"
+              />
+              <button
+                type="button"
+                onClick={handleAddImage}
+                className="px-6 py-3 bg-[#C6A667] text-white hover:bg-[#B89557] transition-colors flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                Add / הוסף
+              </button>
+            </div>
+            <p className="mt-2 text-xs" style={{ color: '#1A1A1A', opacity: 0.5 }}>
+              First image will be the main project image / התמונה הראשונה תהיה התמונה הראשית
+            </p>
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-4 pt-6 border-t border-[#1A1A1A]/10">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 px-6 py-3 border border-[#1A1A1A]/20 hover:bg-[#F3F3F3] transition-colors"
+              style={{ fontSize: '0.9rem', fontWeight: 400 }}
+            >
+              Cancel / ביטול
+            </button>
+            <button
+              type="submit"
+              className="flex-1 px-6 py-3 bg-[#C6A667] text-white hover:bg-[#B89557] transition-colors"
+              style={{ fontSize: '0.9rem', fontWeight: 400 }}
+            >
+              {editProject ? 'Update Project / עדכן' : 'Add Project / הוסף'}
+            </button>
+          </div>
+        </form>
+      </motion.div>
+    </div>
+  );
+}

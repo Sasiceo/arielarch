@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+:root {
+  --color-white-pure: #FFFFFF;
+  --color-soft-black: #1A1A1A;
+  --color-warm-neutral: #F3F3F3;
+  --color-gold-accent: #C6A667;
+  --color-wood-tone: #D0B49A;
+}
+
+@layer base {
+  * {
+    @apply box-border;
+  }
+
+  html {
+    @apply antialiased;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    font-weight: 300;
+    color: var(--color-soft-black);
+    background-color: var(--color-white-pure);
+    line-height: 1.6;
+  }
+
+  h1 {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 300;
+    font-size: 3.5rem;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+
+  h2 {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 300;
+    font-size: 2.5rem;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+  }
+
+  h3 {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 400;
+    font-size: 1.5rem;
+    line-height: 1.4;
+  }
+
+  p {
+    font-size: 1rem;
+    line-height: 1.8;
+    font-weight: 300;
+  }
+
+  button {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 400;
+  }
+}
