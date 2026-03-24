@@ -14,8 +14,10 @@ import heroImage from './assets/Hero.png';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
+import { supabase } from './lib/supabase';
 
 interface Project {
+  id?: string;
   titleKey?: string;
   categoryKey?: string;
   descriptionKey?: string;
@@ -210,12 +212,27 @@ const initialProjects: Project[] = [
   }
 ];
 
+function mapRowToProject(row: any): Project {
+  return {
+    id: row.id,
+    titleEn: row.title_en || '',
+    titleHe: row.title_he || '',
+    categoryEn: row.category_en || '',
+    categoryHe: row.category_he || '',
+    descriptionEn: row.description_en || '',
+    descriptionHe: row.description_he || '',
+    detailsEn: row.details_en || '',
+    detailsHe: row.details_he || '',
+    imageUrl: row.image_url,
+    images: row.images || [],
+    category: row.category,
+  };
+}
+
 function AppContent() {
   const { t, language } = useLanguage();
-  const [projects, setProjects] = useState<Project[]>(() => {
-    const saved = localStorage.getItem('ariel-projects');
-    return saved ? JSON.parse(saved) : initialProjects;
-  });
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -223,6 +240,30 @@ function AppContent() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return localStorage.getItem('ariel-admin-auth') === 'true';
   });
+
+  // Fetch projects from Supabase
+  const fetchProjects = async () => {
+    const { data, error } = await supabase
+      .from('projects')
+      .select('*')
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching projects:', error);
+      // Fallback to initial projects if DB is empty or errors
+      setProjects(initialProjects);
+    } else if (data && data.length > 0) {
+      setProjects(data.map(mapRowToProject));
+    } else {
+      // DB is empty — use initial projects as fallback
+      setProjects(initialProjects);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchProjects();
+  }, []);
 
   // Check for admin route
   useEffect(() => {
@@ -232,17 +273,12 @@ function AppContent() {
         setIsAdmin(true);
       }
     };
-    
+
     checkAdminRoute();
     window.addEventListener('hashchange', checkAdminRoute);
-    
+
     return () => window.removeEventListener('hashchange', checkAdminRoute);
   }, []);
-
-  // Save projects to localStorage
-  useEffect(() => {
-    localStorage.setItem('ariel-projects', JSON.stringify(projects));
-  }, [projects]);
 
   // Scroll to top when category changes
   useEffect(() => {
@@ -263,19 +299,88 @@ function AppContent() {
     window.location.hash = '';
   };
 
-  const handleAddProject = (newProject: Project) => {
-    setProjects([...projects, newProject]);
+  const handleAddProject = async (newProject: Project) => {
+    const { data, error } = await supabase
+      .from('projects')
+      .insert({
+        title_en: newProject.titleEn || '',
+        title_he: newProject.titleHe || '',
+        category_en: newProject.categoryEn || '',
+        category_he: newProject.categoryHe || '',
+        description_en: newProject.descriptionEn || '',
+        description_he: newProject.descriptionHe || '',
+        details_en: newProject.detailsEn || '',
+        details_he: newProject.detailsHe || '',
+        image_url: newProject.imageUrl,
+        images: newProject.images || [],
+        category: newProject.category,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error adding project:', error);
+      alert('Error adding project / שגיאה בהוספת פרויקט');
+      return;
+    }
+
+    setProjects([...projects, mapRowToProject(data)]);
   };
 
-  const handleEditProject = (index: number, updatedProject: Project) => {
+  const handleEditProject = async (index: number, updatedProject: Project) => {
+    const projectToUpdate = projects[index];
+    if (!projectToUpdate?.id) {
+      console.error('No project ID for update');
+      return;
+    }
+
+    const { error } = await supabase
+      .from('projects')
+      .update({
+        title_en: updatedProject.titleEn || '',
+        title_he: updatedProject.titleHe || '',
+        category_en: updatedProject.categoryEn || '',
+        category_he: updatedProject.categoryHe || '',
+        description_en: updatedProject.descriptionEn || '',
+        description_he: updatedProject.descriptionHe || '',
+        details_en: updatedProject.detailsEn || '',
+        details_he: updatedProject.detailsHe || '',
+        image_url: updatedProject.imageUrl,
+        images: updatedProject.images || [],
+        category: updatedProject.category,
+      })
+      .eq('id', projectToUpdate.id);
+
+    if (error) {
+      console.error('Error updating project:', error);
+      alert('Error updating project / שגיאה בעדכון פרויקט');
+      return;
+    }
+
     const newProjects = [...projects];
-    newProjects[index] = updatedProject;
+    newProjects[index] = { ...updatedProject, id: projectToUpdate.id };
     setProjects(newProjects);
   };
 
-  const handleDeleteProject = (index: number) => {
-    const newProjects = projects.filter((_, i) => i !== index);
-    setProjects(newProjects);
+  const handleDeleteProject = async (index: number) => {
+    const projectToDelete = projects[index];
+    if (!projectToDelete?.id) {
+      console.error('No project ID for delete');
+      return;
+    }
+
+    const { error } = await supabase
+      .from('projects')
+      .delete()
+      .eq('id', projectToDelete.id);
+
+    if (error) {
+      console.error('Error deleting project:', error);
+      alert('Error deleting project / שגיאה במחיקת פרויקט');
+      return;
+    }
+
+    setProjects(projects.filter((_, i) => i !== index));
   };
 
   const handleProjectClick = (project: Project) => {
@@ -299,6 +404,16 @@ function AppContent() {
   const getCurrentCategory = () => {
     return categories.find(cat => cat.id === selectedCategory);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div style={{ color: '#C6A667', fontSize: '1rem', fontWeight: 300, letterSpacing: '1px' }}>
+          Loading...
+        </div>
+      </div>
+    );
+  }
 
   // Show admin login if admin route but not authenticated
   if (isAdmin && !isAuthenticated) {
