@@ -1,7 +1,8 @@
 import { motion } from 'motion/react';
-import { useState } from 'react';
-import { X, Upload, Plus, Trash2 } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { X, Upload, Plus, Trash2, Loader2 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { supabase } from '../lib/supabase';
 
 interface Category {
   id: string;
@@ -49,6 +50,8 @@ export function AdminProjectForm({ onClose, onSave, categories, editProject }: A
   );
 
   const [imageInput, setImageInput] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleCategoryChange = (categoryId: string) => {
     const selectedCategory = categories.find(cat => cat.id === categoryId);
@@ -80,6 +83,48 @@ export function AdminProjectForm({ onClose, onSave, categories, editProject }: A
       images: newImages,
       imageUrl: newImages.length > 0 ? newImages[0] : ''
     });
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploading(true);
+    const newImages: string[] = [];
+
+    for (const file of Array.from(files)) {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `projects/${fileName}`;
+
+      const { error } = await supabase.storage
+        .from('project-images')
+        .upload(filePath, file);
+
+      if (error) {
+        console.error('Upload error:', error);
+        alert(`Failed to upload ${file.name} / שגיאה בהעלאת ${file.name}`);
+        continue;
+      }
+
+      const { data: urlData } = supabase.storage
+        .from('project-images')
+        .getPublicUrl(filePath);
+
+      newImages.push(urlData.publicUrl);
+    }
+
+    if (newImages.length > 0) {
+      const updatedImages = [...formData.images.filter(img => img), ...newImages];
+      setFormData({
+        ...formData,
+        images: updatedImages,
+        imageUrl: formData.imageUrl || updatedImages[0]
+      });
+    }
+
+    setUploading(false);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -256,14 +301,49 @@ export function AdminProjectForm({ onClose, onSave, categories, editProject }: A
               </div>
             )}
 
-            {/* Add New Image */}
+            {/* Upload Images */}
+            <div className="mb-4">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleFileUpload}
+                className="hidden"
+                id="image-upload"
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="w-full px-6 py-4 border-2 border-dashed border-[#1A1A1A]/20 hover:border-[#C6A667] transition-colors flex items-center justify-center gap-3 disabled:opacity-50"
+              >
+                {uploading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" style={{ color: '#C6A667' }} />
+                    <span style={{ color: '#1A1A1A', fontSize: '0.9rem', fontWeight: 300 }}>
+                      Uploading... / מעלה...
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-5 h-5" style={{ color: '#C6A667' }} />
+                    <span style={{ color: '#1A1A1A', fontSize: '0.9rem', fontWeight: 300 }}>
+                      Upload Images / העלה תמונות
+                    </span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Or Add by URL */}
             <div className="flex gap-2">
               <input
                 type="url"
                 value={imageInput}
                 onChange={(e) => setImageInput(e.target.value)}
                 className="flex-1 px-4 py-3 border border-[#1A1A1A]/20 focus:border-[#C6A667] focus:outline-none"
-                placeholder="Image URL (https://...)"
+                placeholder="Or paste image URL (https://...)"
               />
               <button
                 type="button"
