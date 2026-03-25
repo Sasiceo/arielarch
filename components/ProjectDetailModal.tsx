@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'motion/react';
-import { X, ChevronLeft, ChevronRight, FileText, Download } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, FileText, Eye } from 'lucide-react';
 import { useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -29,6 +29,7 @@ interface ProjectDetailModalProps {
 export function ProjectDetailModal({ project, onClose }: ProjectDetailModalProps) {
   const { t, language } = useLanguage();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [activeDrawing, setActiveDrawing] = useState<number | null>(null);
 
   if (!project) return null;
 
@@ -58,6 +59,7 @@ export function ProjectDetailModal({ project, onClose }: ProjectDetailModalProps
 
   const handleClose = () => {
     setCurrentImageIndex(0);
+    setActiveDrawing(null);
     onClose();
   };
 
@@ -166,19 +168,42 @@ export function ProjectDetailModal({ project, onClose }: ProjectDetailModalProps
                 </div>
                 <div className="space-y-3">
                   {project.drawings.map((url, index) => (
-                    <a
-                      key={index}
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-4 p-4 border border-[#1A1A1A]/10 hover:border-[#C6A667]/50 transition-colors group"
-                    >
-                      <FileText className="w-5 h-5 flex-shrink-0" style={{ color: '#C6A667' }} />
-                      <span className="flex-1 truncate" style={{ color: '#1A1A1A', fontSize: '0.9rem', fontWeight: 300 }}>
-                        {language === 'en' ? `Drawing ${index + 1}` : `שרטוט ${index + 1}`}
-                      </span>
-                      <Download className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: '#C6A667' }} />
-                    </a>
+                    <div key={index}>
+                      <button
+                        onClick={() => setActiveDrawing(activeDrawing === index ? null : index)}
+                        className={`w-full flex items-center gap-4 p-4 border transition-colors ${
+                          activeDrawing === index
+                            ? 'border-[#C6A667] bg-[#C6A667]/5'
+                            : 'border-[#1A1A1A]/10 hover:border-[#C6A667]/50'
+                        }`}
+                      >
+                        <FileText className="w-5 h-5 flex-shrink-0" style={{ color: '#C6A667' }} />
+                        <span className="flex-1 text-left truncate" style={{ color: '#1A1A1A', fontSize: '0.9rem', fontWeight: 300 }}>
+                          {language === 'en' ? `Drawing ${index + 1}` : `שרטוט ${index + 1}`}
+                        </span>
+                        <Eye className="w-4 h-4" style={{ color: '#C6A667' }} />
+                        <span style={{ color: '#C6A667', fontSize: '0.75rem', fontWeight: 400 }}>
+                          {activeDrawing === index
+                            ? (language === 'en' ? 'Close' : 'סגור')
+                            : (language === 'en' ? 'View' : 'צפה')}
+                        </span>
+                      </button>
+                      {activeDrawing === index && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          transition={{ duration: 0.3 }}
+                          className="border border-t-0 border-[#C6A667]/30"
+                        >
+                          <iframe
+                            src={`${url}#toolbar=0&navpanes=0`}
+                            className="w-full"
+                            style={{ height: '70vh' }}
+                            title={`Drawing ${index + 1}`}
+                          />
+                        </motion.div>
+                      )}
+                    </div>
                   ))}
                 </div>
               </div>
