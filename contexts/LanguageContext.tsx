@@ -21,7 +21,7 @@ const translations = {
     
     // Hero
     'hero.title': 'Architecture with Material.',
-    'hero.description': 'Private homes in the Galilee, contemporary interior design, and bespoke carpentry — each project tells a story of material, light, and a refined minimalist language.',
+    'hero.description': 'Private homes in the Galilee, contemporary interior design, and bespoke carpentry — each project tells a story of material, light, and refined minimalist design.',
     'hero.cta': 'View Projects',
     
     // Portfolio
@@ -97,7 +97,7 @@ const translations = {
     'about.label': 'Approach',
     'about.title': 'Material, Light, and Precision.',
     'about.description1': 'Every project is shaped by a deep understanding of the client, the landscape, and the meeting point between concept and execution.',
-    'about.description2': 'My architectural approach focuses on disciplined simplicity, crafted details, and a natural dialogue between materials — especially wood — bringing warmth and authenticity into the space.',
+    'about.description2': 'My approach focuses on disciplined simplicity, crafted details, and a natural dialogue between materials — especially wood — bringing warmth and authenticity to every space.',
     'about.service1.title': 'Private Residential',
     'about.service1.description': 'Contemporary homes in the Galilee that respond to landscape and light.',
     'about.service2.title': 'Interior Design',
@@ -115,7 +115,7 @@ const translations = {
     'contact.location.value': 'Galilee, Israel',
     
     // Footer
-    'footer.copyright': '© 2025 Ariel Hasan. Architecture & Interior Design.',
+    'footer.copyright': '© 2026 Ariel Hasan. Architecture & Interior Design.',
   },
   he: {
     // Header
@@ -127,7 +127,7 @@ const translations = {
     
     // Hero
     'hero.title': 'אדריכלות של חומר.',
-    'hero.description': 'בתים פרטיים בגליל, עיצוב פנים עכשווי, ונגרות מותאמת אישית — כל פרויקט מספר סיפור של חומר, אור ושפה מינימליסטית מעודנת.',
+    'hero.description': 'בתים פרטיים בגליל, עיצוב פנים עכשווי ונגרות בהתאמה אישית — כל פרויקט מספר סיפור של חומר, אור ועיצוב מינימליסטי מעודן.',
     'hero.cta': 'לתיק העבודות',
     
     // Portfolio
@@ -203,7 +203,7 @@ const translations = {
     'about.label': 'גישה',
     'about.title': 'חומר, אור ודיוק.',
     'about.description1': 'כל פרויקט מעוצב מתוך הבנה עמוקה של הלקוח, הנוף ונקודת המפגש בין קונספט לביצוע.',
-    'about.description2': 'הגישה האדריכלית שלי מתמקדת בפשטות ממושמעת, פרטים מעוצבים ודיאלוג טבעי בין חומרים — במיוחד עץ — המביאים חום ואותנטיות למרחב.',
+    'about.description2': 'הגישה שלי מתמקדת בפשטות ממושמעת, פרטים מעוצבים ודיאלוג טבעי בין חומרים — במיוחד עץ — שמביאים חום ואותנטיות לכל מרחב.',
     'about.service1.title': 'מגורים פרטיים',
     'about.service1.description': 'בתים עכשוויים בגליל המגיבים לנוף ולאור.',
     'about.service2.title': 'עיצוב פנים',
@@ -221,7 +221,7 @@ const translations = {
     'contact.location.value': 'גליל, ישראל',
     
     // Footer
-    'footer.copyright': '© 2025 אריאל חסן. אדריכלות ועיצוב פנים.',
+    'footer.copyright': '© 2026 אריאל חסן. אדריכלות ועיצוב פנים.',
   }
 };
 

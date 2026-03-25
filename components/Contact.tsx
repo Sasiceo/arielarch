@@ -47,11 +47,11 @@ export function Contact() {
               {t('contact.email')}
             </h3>
             <a 
-              href="mailto:ariel@arielhasan.com" 
+              href="mailto:idra.arc@gmail.com"
               className="transition-colors duration-300 hover:text-[#C6A667]"
               style={{ color: '#1A1A1A', opacity: 0.7, fontSize: '0.95rem', fontWeight: 300 }}
             >
-              ariel@arielhasan.com
+              idra.arc@gmail.com
             </a>
           </div>
           
@@ -63,11 +63,11 @@ export function Contact() {
               {t('contact.phone')}
             </h3>
             <a 
-              href="tel:+972501234567" 
+              href="tel:+972527028605"
               className="transition-colors duration-300 hover:text-[#C6A667]"
               style={{ color: '#1A1A1A', opacity: 0.7, fontSize: '0.95rem', fontWeight: 300 }}
             >
-              +972 50-123-4567
+              052-702-8605
             </a>
           </div>
           

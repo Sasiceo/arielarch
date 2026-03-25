@@ -34,22 +34,23 @@ export function Footer() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="flex gap-8"
           >
-            <a 
-              href="#" 
+            {/* TODO: Add real social media URLs */}
+            <a
+              href="#"
               className="transition-all duration-300 hover:opacity-100"
               style={{ color: '#1A1A1A', opacity: 0.6, fontSize: '0.85rem', fontWeight: 300 }}
             >
               Instagram
             </a>
-            <a 
-              href="#" 
+            <a
+              href="#"
               className="transition-all duration-300 hover:opacity-100"
               style={{ color: '#1A1A1A', opacity: 0.6, fontSize: '0.85rem', fontWeight: 300 }}
             >
               LinkedIn
             </a>
-            <a 
-              href="#" 
+            <a
+              href="#"
               className="transition-all duration-300 hover:opacity-100"
               style={{ color: '#1A1A1A', opacity: 0.6, fontSize: '0.85rem', fontWeight: 300 }}
             >
