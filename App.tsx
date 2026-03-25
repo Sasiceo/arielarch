@@ -32,6 +32,7 @@ interface Project {
   detailsHe?: string;
   imageUrl: string;
   images?: string[];
+  drawings?: string[];
   category: string;
 }
 
@@ -225,6 +226,7 @@ function mapRowToProject(row: any): Project {
     detailsHe: row.details_he || '',
     imageUrl: row.image_url,
     images: row.images || [],
+    drawings: row.drawings || [],
     category: row.category,
   };
 }
@@ -313,6 +315,7 @@ function AppContent() {
         details_he: newProject.detailsHe || '',
         image_url: newProject.imageUrl,
         images: newProject.images || [],
+        drawings: newProject.drawings || [],
         category: newProject.category,
       })
       .select()
@@ -347,6 +350,7 @@ function AppContent() {
         details_he: updatedProject.detailsHe || '',
         image_url: updatedProject.imageUrl,
         images: updatedProject.images || [],
+        drawings: updatedProject.drawings || [],
         category: updatedProject.category,
       })
       .eq('id', projectToUpdate.id);

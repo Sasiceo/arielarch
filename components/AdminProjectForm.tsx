@@ -1,6 +1,6 @@
 import { motion } from 'motion/react';
 import { useState, useRef } from 'react';
-import { X, Upload, Plus, Trash2, Loader2 } from 'lucide-react';
+import { X, Upload, Plus, Trash2, Loader2, FileText } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { supabase } from '../lib/supabase';
 
@@ -21,6 +21,7 @@ interface ProjectFormData {
   detailsHe: string;
   imageUrl: string;
   images: string[];
+  drawings: string[];
   category: string;
 }
 
@@ -45,13 +46,16 @@ export function AdminProjectForm({ onClose, onSave, categories, editProject }: A
       detailsHe: '',
       imageUrl: '',
       images: [''],
+      drawings: [],
       category: ''
     }
   );
 
   const [imageInput, setImageInput] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [pdfUploading, setPdfUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const pdfInputRef = useRef<HTMLInputElement>(null);
 
   const handleCategoryChange = (categoryId: string) => {
     const selectedCategory = categories.find(cat => cat.id === categoryId);
@@ -127,9 +131,56 @@ export function AdminProjectForm({ onClose, onSave, categories, editProject }: A
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
+  const handlePdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setPdfUploading(true);
+    const newDrawings: string[] = [];
+
+    for (const file of Array.from(files)) {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `projects/drawings/${fileName}`;
+
+      const { error } = await supabase.storage
+        .from('project-images')
+        .upload(filePath, file);
+
+      if (error) {
+        console.error('Upload error:', error);
+        alert(`Failed to upload ${file.name} / שגיאה בהעלאת ${file.name}`);
+        continue;
+      }
+
+      const { data: urlData } = supabase.storage
+        .from('project-images')
+        .getPublicUrl(filePath);
+
+      newDrawings.push(urlData.publicUrl);
+    }
+
+    if (newDrawings.length > 0) {
+      setFormData({
+        ...formData,
+        drawings: [...formData.drawings, ...newDrawings],
+      });
+    }
+
+    setPdfUploading(false);
+    if (pdfInputRef.current) pdfInputRef.current.value = '';
+  };
+
+  const handleRemoveDrawing = (index: number) => {
+    setFormData({
+      ...formData,
+      drawings: formData.drawings.filter((_, i) => i !== index),
+    });
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validation
     if (!formData.titleEn || !formData.titleHe || !formData.category || !formData.imageUrl) {
       alert('נא למלא את כל השדות החובה / Please fill all required fields');
@@ -357,6 +408,75 @@ export function AdminProjectForm({ onClose, onSave, categories, editProject }: A
             <p className="mt-2 text-xs" style={{ color: '#1A1A1A', opacity: 0.5 }}>
               First image will be the main project image / התמונה הראשונה תהיה התמונה הראשית
             </p>
+          </div>
+
+          {/* Drawings (PDF) */}
+          <div className="mb-8">
+            <label className="block mb-3" style={{ color: '#1A1A1A', fontSize: '0.9rem', fontWeight: 400 }}>
+              Drawings / שרטוטים (PDF)
+            </label>
+
+            {/* Uploaded Drawings List */}
+            {formData.drawings.length > 0 && (
+              <div className="mb-4 space-y-2">
+                {formData.drawings.map((url, index) => (
+                  <div key={index} className="flex items-center gap-3 p-3 border border-[#1A1A1A]/10 group">
+                    <FileText className="w-5 h-5 flex-shrink-0" style={{ color: '#C6A667' }} />
+                    <span className="flex-1 truncate" style={{ color: '#1A1A1A', fontSize: '0.85rem', fontWeight: 300 }}>
+                      {language === 'en' ? `Drawing ${index + 1}` : `שרטוט ${index + 1}`}
+                    </span>
+                    <a
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3 py-1 text-xs hover:bg-[#F3F3F3] transition-colors"
+                      style={{ color: '#C6A667', fontWeight: 400 }}
+                    >
+                      View / צפה
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveDrawing(index)}
+                      className="p-1.5 hover:bg-red-50 transition-colors rounded"
+                    >
+                      <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Upload PDF Button */}
+            <input
+              ref={pdfInputRef}
+              type="file"
+              accept=".pdf,application/pdf"
+              multiple
+              onChange={handlePdfUpload}
+              className="hidden"
+            />
+            <button
+              type="button"
+              onClick={() => pdfInputRef.current?.click()}
+              disabled={pdfUploading}
+              className="w-full px-6 py-4 border-2 border-dashed border-[#1A1A1A]/20 hover:border-[#C6A667] transition-colors flex items-center justify-center gap-3 disabled:opacity-50"
+            >
+              {pdfUploading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" style={{ color: '#C6A667' }} />
+                  <span style={{ color: '#1A1A1A', fontSize: '0.9rem', fontWeight: 300 }}>
+                    Uploading... / מעלה...
+                  </span>
+                </>
+              ) : (
+                <>
+                  <FileText className="w-5 h-5" style={{ color: '#C6A667' }} />
+                  <span style={{ color: '#1A1A1A', fontSize: '0.9rem', fontWeight: 300 }}>
+                    Upload Drawings (PDF) / העלה שרטוטים
+                  </span>
+                </>
+              )}
+            </button>
           </div>
 
           {/* Actions */}

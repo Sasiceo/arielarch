@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'motion/react';
-import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, FileText, Download } from 'lucide-react';
 import { useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -18,6 +18,7 @@ interface Project {
   detailsHe?: string;
   imageUrl: string;
   images?: string[];
+  drawings?: string[];
 }
 
 interface ProjectDetailModalProps {
@@ -153,6 +154,35 @@ export function ProjectDetailModal({ project, onClose }: ProjectDetailModalProps
                 </div>
               )}
             </div>
+
+            {/* Drawings Section */}
+            {project.drawings && project.drawings.length > 0 && (
+              <div className="px-8 md:px-12 pb-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="h-[1px] w-12 bg-[#C6A667]"></div>
+                  <span style={{ color: '#C6A667', fontSize: '0.8rem', fontWeight: 400, letterSpacing: '1.5px', textTransform: 'uppercase' }}>
+                    {language === 'en' ? 'Drawings' : 'שרטוטים'}
+                  </span>
+                </div>
+                <div className="space-y-3">
+                  {project.drawings.map((url, index) => (
+                    <a
+                      key={index}
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-4 p-4 border border-[#1A1A1A]/10 hover:border-[#C6A667]/50 transition-colors group"
+                    >
+                      <FileText className="w-5 h-5 flex-shrink-0" style={{ color: '#C6A667' }} />
+                      <span className="flex-1 truncate" style={{ color: '#1A1A1A', fontSize: '0.9rem', fontWeight: 300 }}>
+                        {language === 'en' ? `Drawing ${index + 1}` : `שרטוט ${index + 1}`}
+                      </span>
+                      <Download className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: '#C6A667' }} />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Thumbnail Gallery */}
             {images.length > 1 && (

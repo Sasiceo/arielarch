@@ -15,6 +15,7 @@ interface Project {
   detailsHe?: string;
   imageUrl: string;
   images?: string[];
+  drawings?: string[];
   category: string;
 }
 

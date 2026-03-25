@@ -17,6 +17,7 @@ export interface ProjectRow {
   details_he: string | null
   image_url: string
   images: string[]
+  drawings: string[]
   category: string
   created_at: string
 }
