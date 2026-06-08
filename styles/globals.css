@@ -1,30 +1,11 @@
 @import "tailwindcss";
 
-/* ----------------------------------------------------------------------------
-   Design tokens (Tailwind v4 @theme → utilities like font-display, text-gold)
----------------------------------------------------------------------------- */
-@theme {
-  /* Type families. Cormorant/Montserrat carry Latin; Hebrew falls through to
-     Frank Ruhl Libre / Heebo automatically (the Latin faces have no Hebrew glyphs). */
-  --font-sans: "Montserrat", "Heebo", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-display: "Cormorant", "Frank Ruhl Libre", Georgia, "Times New Roman", serif;
-
-  /* Palette */
-  --color-ink: #1a1a1a;
-  --color-ink-soft: #4a4a4a;
-  --color-gold: #c6a667;
-  --color-gold-deep: #a8884a;
-  --color-cream: #f3f3f3;
-  --color-wood: #d0b49a;
-}
-
 :root {
-  /* Legacy aliases kept so existing inline styles keep resolving */
-  --color-white-pure: #ffffff;
-  --color-soft-black: #1a1a1a;
-  --color-warm-neutral: #f3f3f3;
-  --color-gold-accent: #c6a667;
-  --color-wood-tone: #d0b49a;
+  --color-white-pure: #FFFFFF;
+  --color-soft-black: #1A1A1A;
+  --color-warm-neutral: #F3F3F3;
+  --color-gold-accent: #C6A667;
+  --color-wood-tone: #D0B49A;
 }
 
 @layer base {
@@ -34,47 +15,37 @@
 
   html {
     @apply antialiased;
-    scroll-behavior: smooth;
   }
 
   body {
-    font-family: var(--font-sans);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
     font-weight: 300;
-    color: var(--color-ink);
-    background-color: #ffffff;
-    line-height: 1.7;
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
-  }
-
-  /* Headings use the display serif. Cormorant runs visually small/light, so we
-     bump sizes and weight a touch for presence. */
-  h1,
-  h2,
-  h3,
-  h4 {
-    font-family: var(--font-display);
-    color: var(--color-ink);
+    color: var(--color-soft-black);
+    background-color: var(--color-white-pure);
+    line-height: 1.6;
   }
 
   h1 {
-    font-weight: 500;
-    font-size: clamp(3rem, 7vw, 5.25rem);
-    line-height: 1.05;
-    letter-spacing: -0.01em;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 300;
+    font-size: 3.5rem;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
   }
 
   h2 {
-    font-weight: 500;
-    font-size: clamp(2.25rem, 4.5vw, 3.5rem);
-    line-height: 1.12;
-    letter-spacing: -0.005em;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 300;
+    font-size: 2.5rem;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
   }
 
   h3 {
-    font-weight: 500;
-    font-size: 1.6rem;
-    line-height: 1.3;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 400;
+    font-size: 1.5rem;
+    line-height: 1.4;
   }
 
   p {
@@ -84,70 +55,7 @@
   }
 
   button {
-    font-family: var(--font-sans);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     font-weight: 400;
-  }
-
-  /* Hebrew display serif benefits from a hair more weight + line-height */
-  [dir="rtl"] h1,
-  [dir="rtl"] h2,
-  [dir="rtl"] h3,
-  [dir="rtl"] h4 {
-    font-weight: 600;
-    line-height: 1.2;
-    letter-spacing: 0;
-  }
-
-  ::selection {
-    background: var(--color-gold);
-    color: #ffffff;
-  }
-
-  :focus-visible {
-    outline: 2px solid var(--color-gold);
-    outline-offset: 3px;
-  }
-}
-
-/* ----------------------------------------------------------------------------
-   Utilities
----------------------------------------------------------------------------- */
-@layer utilities {
-  /* Small uppercase tracked label used across sections ("SELECTED WORKS" etc.) */
-  .kicker {
-    font-family: var(--font-sans);
-    font-size: 0.72rem;
-    font-weight: 500;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: var(--color-gold);
-  }
-
-  /* Hebrew shouldn't be uppercased or heavily tracked */
-  [dir="rtl"] .kicker {
-    text-transform: none;
-    letter-spacing: 0.08em;
-    font-size: 0.82rem;
-  }
-
-  .hairline {
-    height: 1px;
-    background: var(--color-gold);
-  }
-}
-
-/* ----------------------------------------------------------------------------
-   Motion safety
----------------------------------------------------------------------------- */
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.001ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
   }
 }
