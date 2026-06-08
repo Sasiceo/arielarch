@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 type Language = 'en' | 'he';
 
@@ -20,14 +20,18 @@ const translations = {
     'nav.contact': 'Contact',
     
     // Hero
+    'hero.kicker': 'Architecture · Interior · Carpentry',
     'hero.title': 'Architecture with Material.',
     'hero.description': 'Private homes in the Galilee, contemporary interior design, and bespoke carpentry — each project tells a story of material, light, and refined minimalist design.',
     'hero.cta': 'View Projects',
-    
+    'hero.cta2': 'Get in touch',
+    'hero.scroll': 'Scroll',
+
     // Portfolio
     'portfolio.label': 'Selected Works',
     'portfolio.title': 'Portfolio',
     'portfolio.description': 'A curated selection of projects presented through clean imagery and concise descriptions. From contemporary interiors to private home design, to advanced carpentry built with CNC and precision manufacturing technologies.',
+    'category.view': 'View collection',
     
     // Architecture Projects
     'project1.title': 'Stone House, Galilee',
@@ -113,9 +117,18 @@ const translations = {
     'contact.phone': 'Phone',
     'contact.location': 'Location',
     'contact.location.value': 'Galilee, Israel',
+    'contact.form.name': 'Full name',
+    'contact.form.email': 'Email',
+    'contact.form.message': 'Tell me about your project',
+    'contact.form.send': 'Send message',
+    'contact.form.success': 'Thanks — your email client will open with the message ready to send.',
+    'contact.whatsapp': 'Message on WhatsApp',
+    'contact.directLabel': 'Or reach me directly',
     
     // Footer
     'footer.copyright': '© 2026 Ariel Hasan. Architecture & Interior Design.',
+    'footer.tagline': 'Architecture, interior design and bespoke carpentry in the Galilee — where material, light and craft meet.',
+    'footer.follow': 'Follow',
   },
   he: {
     // Header
@@ -126,14 +139,18 @@ const translations = {
     'nav.contact': 'צור קשר',
     
     // Hero
+    'hero.kicker': 'אדריכלות · עיצוב פנים · נגרות',
     'hero.title': 'אדריכלות של חומר.',
     'hero.description': 'בתים פרטיים בגליל, עיצוב פנים עכשווי ונגרות בהתאמה אישית — כל פרויקט מספר סיפור של חומר, אור ועיצוב מינימליסטי מעודן.',
     'hero.cta': 'לתיק העבודות',
-    
+    'hero.cta2': 'צרו קשר',
+    'hero.scroll': 'גלול',
+
     // Portfolio
     'portfolio.label': 'עבודות נבחרות',
     'portfolio.title': 'תיק עבודות',
     'portfolio.description': 'מבחר פרויקטים מוקפד המוצג דרך תמונות נקיות ותיאורים תמציתיים. מעיצוב פנים עכשווי לתכנון בתים פרטיים, ועד נגרות מתקדמת הבנויה בטכנולוגיות CNC וייצור דיוק.',
+    'category.view': 'לצפייה באוסף',
     
     // Architecture Projects
     'project1.title': 'בית אבן, גליל',
@@ -217,16 +234,46 @@ const translations = {
     'contact.description': 'בין אם אתם מתכננים בית פרטי, שיפוץ פנים או פרויקט נגרות מותאם אישית, אשמח לשמוע על החזון שלכם.',
     'contact.email': 'אימייל',
     'contact.phone': 'טלפון',
+    'contact.form.name': 'שם מלא',
+    'contact.form.email': 'אימייל',
+    'contact.form.message': 'ספרו לי על הפרויקט שלכם',
+    'contact.form.send': 'שליחת הודעה',
+    'contact.form.success': 'תודה — תוכנת המייל תיפתח עם ההודעה מוכנה לשליחה.',
+    'contact.whatsapp': 'שליחת הודעה בוואטסאפ',
+    'contact.directLabel': 'או ליצירת קשר ישירה',
     'contact.location': 'מיקום',
     'contact.location.value': 'גליל, ישראל',
     
     // Footer
     'footer.copyright': '© 2026 אריאל חסן. אדריכלות ועיצוב פנים.',
+    'footer.tagline': 'אדריכלות, עיצוב פנים ונגרות בהתאמה אישית בגליל — במפגש שבין חומר, אור ומלאכת יד.',
+    'footer.follow': 'עקבו אחריי',
   }
 };
 
+function getInitialLanguage(): Language {
+  if (typeof window === 'undefined') return 'he';
+  const saved = window.localStorage.getItem('ariel-lang');
+  if (saved === 'en' || saved === 'he') return saved;
+  // Default to Hebrew unless the browser clearly prefers English.
+  return navigator.language?.toLowerCase().startsWith('en') ? 'en' : 'he';
+}
+
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguage] = useState<Language>('en');
+  const [language, setLanguageState] = useState<Language>(getInitialLanguage);
+
+  const setLanguage = (lang: Language) => {
+    setLanguageState(lang);
+    if (typeof window !== 'undefined') window.localStorage.setItem('ariel-lang', lang);
+  };
+
+  // Keep <html dir/lang> in sync so RTL applies to the whole document,
+  // fixed/overlay elements included.
+  useEffect(() => {
+    const root = document.documentElement;
+    root.lang = language;
+    root.dir = language === 'he' ? 'rtl' : 'ltr';
+  }, [language]);
 
   const t = (key: string): string => {
     return translations[language][key] || key;
@@ -234,9 +281,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t }}>
-      <div dir={language === 'he' ? 'rtl' : 'ltr'} lang={language}>
-        {children}
-      </div>
+      {children}
     </LanguageContext.Provider>
   );
 }

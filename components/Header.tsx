@@ -1,7 +1,7 @@
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import logoImage from '../assets/logo.png';
 import { useLanguage } from '../contexts/LanguageContext';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Menu, X } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 
 interface Category {
@@ -18,7 +18,17 @@ interface HeaderProps {
 export function Header({ categories, onCategoryClick }: HeaderProps) {
   const { language, setLanguage, t } = useLanguage();
   const [isProjectsOpen, setIsProjectsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Subtle border/shadow + tighter padding once the user scrolls
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 32);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -38,6 +48,7 @@ export function Header({ categories, onCategoryClick }: HeaderProps) {
     if (onCategoryClick) {
       onCategoryClick(categoryId);
       setIsProjectsOpen(false);
+      setMobileOpen(false);
     }
   };
 
@@ -46,26 +57,38 @@ export function Header({ categories, onCategoryClick }: HeaderProps) {
   };
 
   return (
-    <motion.header 
+    <motion.header
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm"
+      className={`fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md transition-[box-shadow,border-color] duration-300 border-b ${
+        scrolled ? 'border-black/10 shadow-[0_1px_20px_rgba(0,0,0,0.05)]' : 'border-transparent'
+      }`}
     >
-      <div className="max-w-[1200px] mx-auto px-8 py-6 flex items-center justify-between">
+      <div className={`max-w-[1200px] mx-auto px-8 flex items-center justify-between transition-all duration-300 ${scrolled ? 'py-4' : 'py-6'}`}>
         <div className="flex items-center gap-3">
           <img src={logoImage} alt="Ariel Hasan" className="h-8 w-auto" />
           <div>
-            <div className="tracking-wide" style={{ color: '#1A1A1A', fontSize: '0.95rem', fontWeight: 400 }}>
+            <div className="font-display leading-tight" style={{ color: '#1A1A1A', fontSize: '1.15rem', fontWeight: 600 }}>
               {t('header.title')}
             </div>
-            <div className="tracking-wide" style={{ color: '#1A1A1A', fontSize: '0.7rem', fontWeight: 300, opacity: 0.6 }}>
+            <div className="tracking-wide" style={{ color: '#1A1A1A', fontSize: '0.68rem', fontWeight: 300, opacity: 0.6, letterSpacing: '0.06em' }}>
               {t('header.subtitle')}
             </div>
           </div>
         </div>
         
-        <div className="flex items-center gap-8">
+        {/* Mobile hamburger */}
+        <button
+          onClick={() => setMobileOpen((v) => !v)}
+          aria-label="Menu"
+          aria-expanded={mobileOpen}
+          className="md:hidden inline-flex items-center justify-center w-10 h-10 -me-2 text-ink cursor-pointer"
+        >
+          {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
+
+        <div className="hidden md:flex items-center gap-8">
           <nav className="flex gap-12">
             {/* Projects Dropdown */}
             {categories && categories.length > 0 && (
@@ -156,6 +179,74 @@ export function Header({ categories, onCategoryClick }: HeaderProps) {
           </div>
         </div>
       </div>
+
+      {/* Mobile menu panel */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3, ease: 'easeInOut' }}
+            className="md:hidden overflow-hidden bg-white border-t border-black/5"
+          >
+            <nav className="px-8 py-6 flex flex-col gap-1 text-start">
+              {categories && categories.length > 0 && (
+                <>
+                  <span className="kicker block mb-2">{language === 'en' ? 'Projects' : 'פרויקטים'}</span>
+                  {categories.map((category) => (
+                    <button
+                      key={category.id}
+                      onClick={() => handleCategoryClick(category.id)}
+                      className="py-2.5 text-start text-ink hover:text-gold transition-colors duration-200 cursor-pointer"
+                      style={{ fontSize: '1.05rem' }}
+                    >
+                      {language === 'en' ? category.nameEn : category.nameHe}
+                    </button>
+                  ))}
+                  <div className="hairline w-full opacity-30 my-4" />
+                </>
+              )}
+
+              <a
+                href="#about"
+                onClick={() => setMobileOpen(false)}
+                className="py-2.5 text-ink hover:text-gold transition-colors duration-200"
+                style={{ fontSize: '1.05rem' }}
+              >
+                {t('nav.about')}
+              </a>
+              <a
+                href="#contact"
+                onClick={() => setMobileOpen(false)}
+                className="py-2.5 text-ink hover:text-gold transition-colors duration-200"
+                style={{ fontSize: '1.05rem' }}
+              >
+                {t('nav.contact')}
+              </a>
+
+              <div className="hairline w-full opacity-30 my-4" />
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => { setLanguage('en'); setMobileOpen(false); }}
+                  className={`px-4 py-2 border transition-colors duration-200 cursor-pointer ${language === 'en' ? 'border-gold text-gold' : 'border-ink/15 text-ink/50'}`}
+                  style={{ fontSize: '0.85rem', letterSpacing: '0.05em' }}
+                >
+                  English
+                </button>
+                <button
+                  onClick={() => { setLanguage('he'); setMobileOpen(false); }}
+                  className={`px-4 py-2 border transition-colors duration-200 cursor-pointer ${language === 'he' ? 'border-gold text-gold' : 'border-ink/15 text-ink/50'}`}
+                  style={{ fontSize: '0.85rem', letterSpacing: '0.05em' }}
+                >
+                  עברית
+                </button>
+              </div>
+            </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.header>
   );
 }
